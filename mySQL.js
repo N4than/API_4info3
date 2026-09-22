@@ -12,12 +12,48 @@ const conexao = async () => {
     return con;
 }
 
-const getUsuario = async () => {
+const getUsuario = async (id=undefined) => {
     const con = await conexao();
-    const dados = await con.query('SELECT * FROM usuarios');
+    let dados;
+
+    if (!id) {
+        dados = await con.query('SELECT * FROM usuarios;');
+    } else {
+        dados = await con.query('SELECT * FROM usuarios WHERE id=?;', [id]);
+    }
     
     con.close();
     return dados[0];
 }
 
-console.log( await getUsuario());
+const createUsuario = async (user) => {
+    const con = await conexao();
+    await con.query(
+        'INSERT INTO usuarios (nome, email) VALUES (?, ?);',
+        [user.nome, user.email]
+    );
+
+    con.close();
+    return `Usuário ${user.nome} adicionado ao MySQL!`;
+}
+
+const deleteUsuario = async (id) => {
+    const con = await conexao();
+    await con.query('DELETE FROM usuarios WHERE id=?', [id]);
+
+    con.close();
+    return `Usuário ${id} deletado do MySQL!`;
+}
+
+const attUsuario = async (user, id) => {
+    const con = await conexao();
+    await con.query(
+        'UPDATE usuarios SET nome = ?,  email = ? WHERE id = ?',
+        [user.nome, user.email, id]
+    );
+
+    con.close();
+    return `Usuário ${user.nome} atualizado no MySQL!`;
+}
+
+console.log(await getUsuario());
